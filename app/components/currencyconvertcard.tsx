@@ -26,29 +26,205 @@ export default function CurrencyConverterCard() {
   const [amount, setAmount] = useState<string>("");
   const [fromCurrency, setFromCurrency] = useState<string>("USD");
   const [toCurrency, setToCurrency] = useState<string>("INR");
+  const [result, setResult] = useState<{
+    conversionResult: string;
+    fromCurrency: string;
+    toCurrency: string;
+  } | null>(null);
 
-  const [rates, setRates] = useState<{ [key: string]: number }>({});
-  const [result, setResult] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+  // const [error, setError] = useState<string | null>(null);
 
   const [showModal, setShowModal] = useState<boolean>(false); // State to handle modal visibility
 
+  const allCurrencies = [
+    "AED",
+    "AFN",
+    "ALL",
+    "AMD",
+    "ANG",
+    "AOA",
+    "ARS",
+    "AUD",
+    "AWG",
+    "AZN",
+    "BAM",
+    "BBD",
+    "BDT",
+    "BGN",
+    "BHD",
+    "BIF",
+    "BMD",
+    "BND",
+    "BOB",
+    "BRL",
+    "BSD",
+    "BTN",
+    "BWP",
+    "BYN",
+    "BZD",
+    "CAD",
+    "CDF",
+    "CHF",
+    "CLP",
+    "CNY",
+    "COP",
+    "CRC",
+    "CUC",
+    "CUP",
+    "CVE",
+    "CZK",
+    "DJF",
+    "DKK",
+    "DOP",
+    "DZD",
+    "EGP",
+    "ERN",
+    "ETB",
+    "EUR",
+    "FJD",
+    "FKP",
+    "GBP",
+    "GEL",
+    "GGP",
+    "GHS",
+    "GIP",
+    "GMD",
+    "GNF",
+    "GTQ",
+    "GYD",
+    "HKD",
+    "HNL",
+    "HRK",
+    "HTG",
+    "HUF",
+    "IDR",
+    "ILS",
+    "IMP",
+    "INR",
+    "IQD",
+    "IRR",
+    "ISK",
+    "JEP",
+    "JMD",
+    "JOD",
+    "JPY",
+    "KES",
+    "KGS",
+    "KHR",
+    "KMF",
+    "KPW",
+    "KRW",
+    "KWD",
+    "KYD",
+    "KZT",
+    "LAK",
+    "LBP",
+    "LKR",
+    "LRD",
+    "LSL",
+    "LYD",
+    "MAD",
+    "MDL",
+    "MGA",
+    "MKD",
+    "MMK",
+    "MNT",
+    "MOP",
+    "MRU",
+    "MUR",
+    "MWK",
+    "MXN",
+    "MYR",
+    "MZN",
+    "NAD",
+    "NGN",
+    "NIO",
+    "NOK",
+    "NPR",
+    "NZD",
+    "OMR",
+    "PAB",
+    "PEN",
+    "PGK",
+    "PHP",
+    "PKR",
+    "PLN",
+    "PYG",
+    "QAR",
+    "RON",
+    "RSD",
+    "RUB",
+    "RWF",
+    "SAR",
+    "SBD",
+    "SCR",
+    "SDG",
+    "SEK",
+    "SGD",
+    "SHP",
+    "SLL",
+    "SOS",
+    "SRD",
+    "SYP",
+    "SZL",
+    "THB",
+    "TJS",
+    "TMT",
+    "TND",
+    "TOP",
+    "TRY",
+    "TTD",
+    "TWD",
+    "TZS",
+    "UAH",
+    "UGX",
+    "USD",
+    "UYU",
+    "UZS",
+    "VES",
+    "VND",
+    "VUV",
+    "WST",
+    "XAF",
+    "XCD",
+    "XOF",
+    "XPF",
+    "YER",
+    "ZAR",
+    "ZMW",
+  ];
+
+
   const fetchRates = async () => {
     try {
-      setError(null);
-      const data = await getLatestExchangeRates(
-        `${fromCurrency},${toCurrency}`
-      );
-      setRates(data.rates);
-      console.log("Fetched rates:", data);
-      return data.rates; // Return the fetched rates
+      // setError(null); // Clear any previous error
+      const data = await getLatestExchangeRates(); // Fetch all currency rates
+  
+      console.log("Fetched data:", data);
+      console.log("Fetched data rates:", data.rates);
+  
+      // Ensure `fromCurrency` and `toCurrency` are present in the response
+      if (data.rates && data.rates[fromCurrency] && data.rates[toCurrency]) {
+        const filteredRates = {
+          [fromCurrency]: data.rates[fromCurrency],
+          [toCurrency]: data.rates[toCurrency],
+        };
+  
+        console.log("Filtered rates:", filteredRates);
+        return filteredRates; // Return the filtered rates
+      } else {
+        throw new Error(
+          `One or both currencies (${fromCurrency}, ${toCurrency}) not found in rates.`
+        );
+      }
     } catch (err) {
-      setError("Failed to fetch exchange rates. Please try again later.");
+      // setError("Failed to fetch exchange rates. Please try again later.");
       console.error("Error fetching rates:", err);
       return null;
     }
   };
+  
 
   const handleFetchAndConvert = async () => {
     setLoading(true);
@@ -57,12 +233,20 @@ export default function CurrencyConverterCard() {
       if (ratesData) {
         // Perform conversion only if rates are successfully fetched
         if (!amount || !fromCurrency || !toCurrency) {
-          setResult("Please fill in all fields.");
+          setResult({
+            conversionResult: "Please fill in all fields.",
+            fromCurrency: "",
+            toCurrency: "",
+          });
           return;
         }
 
         if (!ratesData[fromCurrency] || !ratesData[toCurrency]) {
-          setResult("Conversion rate unavailable. Please try again.");
+          setResult({
+            conversionResult: "Conversion rate unavailable. Please try again.",
+            fromCurrency: "",
+            toCurrency: "",
+          });
           return;
         }
 
@@ -74,7 +258,12 @@ export default function CurrencyConverterCard() {
         const convertedAmount = parseFloat(amount) * conversionRate;
         const conversionResult = `${convertedAmount.toFixed(2)} ${toCurrency}`;
         console.log("Conversion result:", conversionResult);
-        setResult(conversionResult);
+
+        setResult({
+          conversionResult,
+          fromCurrency,
+          toCurrency,
+        });
         setShowModal(true); // Open the modal with the result
       }
     } finally {
@@ -87,6 +276,7 @@ export default function CurrencyConverterCard() {
     setToCurrency(fromCurrency);
     setResult(null);
   };
+
 
   return (
     <motion.div
@@ -110,7 +300,7 @@ export default function CurrencyConverterCard() {
                     <SelectValue placeholder="From" />
                   </SelectTrigger>
                   <SelectContent>
-                    {["USD", "EUR", "INR", "JPY"].map((currency) => (
+                    {allCurrencies.map((currency) => (
                       <SelectItem key={currency} value={currency}>
                         <div className="flex items-center">
                           <CurrencyIcon
@@ -137,7 +327,7 @@ export default function CurrencyConverterCard() {
                     <SelectValue placeholder="To" />
                   </SelectTrigger>
                   <SelectContent>
-                    {["USD", "EUR", "INR", "JPY"].map((currency) => (
+                    {allCurrencies.map((currency) => (
                       <SelectItem key={currency} value={currency}>
                         <div className="flex items-center">
                           <CurrencyIcon
@@ -172,7 +362,7 @@ export default function CurrencyConverterCard() {
       {/* Include the modal component */}
       <ConversionResultModal
         showModal={showModal}
-        result={result || ""}
+        result={result}
         onClose={() => setShowModal(false)} // Close the modal
       />
     </motion.div>

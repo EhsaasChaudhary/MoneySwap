@@ -1,6 +1,5 @@
 import { ExchangeRates } from "@/types/exchangeRates";
 
-
 /**
  * Calculates the conversion rate between two currencies using EUR as the base.
  * @param rates - Object containing exchange rates relative to EUR.

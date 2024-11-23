@@ -1,16 +1,13 @@
-import { motion, AnimatePresence } from 'framer-motion'
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { ArrowRightLeft, X } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ArrowRightLeft, X } from 'lucide-react';
 import CurrencyIcon from '../icons/currencycardicons';
-
-interface ConversionResultModalProps {
-  showModal: boolean;
-  result: string;
-  onClose: () => void;
-}
+import { ConversionResultModalProps } from '@/types/exchangeRates';
 
 export default function ConversionResultModal({ showModal, result, onClose }: ConversionResultModalProps) {
+  if (!result) return null; // Return nothing if result is null
+
   return (
     <AnimatePresence>
       {showModal && (
@@ -41,17 +38,22 @@ export default function ConversionResultModal({ showModal, result, onClose }: Co
                 </Button>
               </CardHeader>
               <CardContent>
-                <div className="flex justify-center space-x-4 mb-4">
-                  <CurrencyIcon currency={result.split(' ')[1] as keyof typeof CurrencyIcon} />
-                  <ArrowRightLeft className="text-primary mt-4" />
-                  <CurrencyIcon currency={result.split(' ')[4] as keyof typeof CurrencyIcon} />
+                <div className="flex justify-center space-x-4 mb-4 items-center">
+                  {/* Display From Currency */}
+                  <CurrencyIcon currency={result.fromCurrency as keyof typeof CurrencyIcon} />
+                  
+                  <ArrowRightLeft className="text-primary" />
+                  
+                  {/* Display To Currency */}
+                  <CurrencyIcon currency={result.toCurrency as keyof typeof CurrencyIcon} />
                 </div>
-                <p className="text-center text-2xl font-bold">{result}</p>
+                {/* Display Conversion Result */}
+                <p className="text-center text-2xl font-bold">{result.conversionResult}</p>
               </CardContent>
             </Card>
           </motion.div>
         </motion.div>
       )}
     </AnimatePresence>
-  )
+  );
 }

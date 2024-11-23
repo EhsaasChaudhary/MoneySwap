@@ -22,8 +22,6 @@ import { getLatestExchangeRates } from "@/lib/api/exchangeRateService";
 import { convertCurrency } from "@/utils/convertCurrency";
 import ConversionResultModal from "./conversionresultmodal";
 
-
-
 export default function CurrencyConverterCard() {
   const [amount, setAmount] = useState<string>("");
   const [fromCurrency, setFromCurrency] = useState<string>("USD");
@@ -33,45 +31,52 @@ export default function CurrencyConverterCard() {
   const [result, setResult] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   const [showModal, setShowModal] = useState<boolean>(false); // State to handle modal visibility
 
   const fetchRates = async () => {
     try {
       setError(null);
-      const data = await getLatestExchangeRates(`${fromCurrency},${toCurrency}`);
+      const data = await getLatestExchangeRates(
+        `${fromCurrency},${toCurrency}`
+      );
       setRates(data.rates);
       console.log("Fetched rates:", data);
+      return data.rates; // Return the fetched rates
     } catch (err) {
       setError("Failed to fetch exchange rates. Please try again later.");
       console.error("Error fetching rates:", err);
+      return null;
     }
-  };
-
-  const handleConvert = () => {
-    if (!amount || !fromCurrency || !toCurrency) {
-      setResult("Please fill in all fields.");
-      return;
-    }
-
-    if (!rates[fromCurrency] || !rates[toCurrency]) {
-      setResult("Conversion rate unavailable. Please try again.");
-      return;
-    }
-
-    const conversionRate = convertCurrency(rates, fromCurrency, toCurrency);
-    const convertedAmount = parseFloat(amount) * conversionRate;
-    const conversionResult = `${convertedAmount.toFixed(2)} ${toCurrency}`;
-    console.log("Conversion result:", conversionResult);
-    setResult(conversionResult);
-    setShowModal(true); // Open the modal with the result
   };
 
   const handleFetchAndConvert = async () => {
     setLoading(true);
     try {
-      await fetchRates();
-      handleConvert();
+      const ratesData = await fetchRates(); // Fetch the rates
+      if (ratesData) {
+        // Perform conversion only if rates are successfully fetched
+        if (!amount || !fromCurrency || !toCurrency) {
+          setResult("Please fill in all fields.");
+          return;
+        }
+
+        if (!ratesData[fromCurrency] || !ratesData[toCurrency]) {
+          setResult("Conversion rate unavailable. Please try again.");
+          return;
+        }
+
+        const conversionRate = convertCurrency(
+          ratesData,
+          fromCurrency,
+          toCurrency
+        );
+        const convertedAmount = parseFloat(amount) * conversionRate;
+        const conversionResult = `${convertedAmount.toFixed(2)} ${toCurrency}`;
+        console.log("Conversion result:", conversionResult);
+        setResult(conversionResult);
+        setShowModal(true); // Open the modal with the result
+      }
     } finally {
       setLoading(false);
     }
@@ -84,7 +89,11 @@ export default function CurrencyConverterCard() {
   };
 
   return (
-    <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.5 }}>
+    <motion.div
+      initial={{ scale: 0.8, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
       <Card className="max-w-md mx-auto backdrop-blur-sm bg-white/80">
         <CardHeader>
           <CardTitle className="text-2xl">Currency Converter</CardTitle>
@@ -104,7 +113,9 @@ export default function CurrencyConverterCard() {
                     {["USD", "EUR", "INR", "JPY"].map((currency) => (
                       <SelectItem key={currency} value={currency}>
                         <div className="flex items-center">
-                          <CurrencyIcon currency={currency as keyof typeof CurrencyIcon} />
+                          <CurrencyIcon
+                            currency={currency as keyof typeof CurrencyIcon}
+                          />
                           <span className="ml-2">{currency}</span>
                         </div>
                       </SelectItem>
@@ -129,7 +140,9 @@ export default function CurrencyConverterCard() {
                     {["USD", "EUR", "INR", "JPY"].map((currency) => (
                       <SelectItem key={currency} value={currency}>
                         <div className="flex items-center">
-                          <CurrencyIcon currency={currency as keyof typeof CurrencyIcon} />
+                          <CurrencyIcon
+                            currency={currency as keyof typeof CurrencyIcon}
+                          />
                           <span className="ml-2">{currency}</span>
                         </div>
                       </SelectItem>
@@ -152,7 +165,6 @@ export default function CurrencyConverterCard() {
             >
               {loading ? "Converting..." : "Convert"}
             </Button>
-            {error && <div className="text-red-500 text-center">{error}</div>}
           </div>
         </CardContent>
       </Card>
@@ -166,4 +178,3 @@ export default function CurrencyConverterCard() {
     </motion.div>
   );
 }
-

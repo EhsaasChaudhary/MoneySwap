@@ -3,7 +3,7 @@ import { Github } from 'lucide-react'
 
 export default function Footer() {
   return (
-    <footer className="bg-muted py-6">
+    <footer className="bg-muted footer py-6">
       <div className="container mx-auto px-4 flex justify-between items-center">
         <p>&copy; 2024 CurrencyConvert</p>
         <motion.a

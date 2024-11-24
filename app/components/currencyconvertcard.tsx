@@ -18,9 +18,20 @@ import { Button } from "@/components/ui/button";
 import { ArrowRightLeft } from "lucide-react";
 import { motion } from "framer-motion";
 import CurrencyIcon from "../icons/currencycardicons";
-import { getLatestExchangeRates } from "@/lib/api/exchangeRateService";
+import { getHistoricalExchangeRates, getLatestExchangeRates } from "@/lib/api/exchangeRateService";
 import { convertCurrency } from "@/utils/convertCurrency";
 import ConversionResultModal from "./conversionresultmodal";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
+
+import { cn } from "@/lib/utils";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Switch } from "@/components/ui/switch";
 
 export default function CurrencyConverterCard() {
   const [amount, setAmount] = useState<string>("");
@@ -33,8 +44,9 @@ export default function CurrencyConverterCard() {
   } | null>(null);
 
   const [loading, setLoading] = useState<boolean>(false);
-  // const [error, setError] = useState<string | null>(null);
 
+const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
+const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [showModal, setShowModal] = useState<boolean>(false); // State to handle modal visibility
 
   const allCurrencies = [
@@ -195,36 +207,38 @@ export default function CurrencyConverterCard() {
     "ZMW",
   ];
 
+const fetchRates = async () => {
+  try {
+    let data;
 
-  const fetchRates = async () => {
-    try {
-      // setError(null); // Clear any previous error
-      const data = await getLatestExchangeRates(); // Fetch all currency rates
-  
-      console.log("Fetched data:", data);
-      console.log("Fetched data rates:", data.rates);
-  
-      // Ensure `fromCurrency` and `toCurrency` are present in the response
-      if (data.rates && data.rates[fromCurrency] && data.rates[toCurrency]) {
-        const filteredRates = {
-          [fromCurrency]: data.rates[fromCurrency],
-          [toCurrency]: data.rates[toCurrency],
-        };
-  
-        console.log("Filtered rates:", filteredRates);
-        return filteredRates; // Return the filtered rates
-      } else {
-        throw new Error(
-          `One or both currencies (${fromCurrency}, ${toCurrency}) not found in rates.`
-        );
-      }
-    } catch (err) {
-      // setError("Failed to fetch exchange rates. Please try again later.");
-      console.error("Error fetching rates:", err);
-      return null;
+    if (isDatePickerVisible && selectedDate) {
+      const formattedDate = format(selectedDate, "yyyy-MM-dd");
+      data = await getHistoricalExchangeRates(formattedDate);
+    } else {
+      // Fetch the latest rates
+      data = await getLatestExchangeRates();
     }
-  };
-  
+
+    console.log("Fetched data:", data);
+
+    if (data && data.rates && data.rates[fromCurrency] && data.rates[toCurrency]) {
+      const filteredRates = {
+        [fromCurrency]: data.rates[fromCurrency],
+        [toCurrency]: data.rates[toCurrency],
+      };
+
+      console.log("Filtered rates:", filteredRates);
+      return filteredRates; // Return the filtered rates
+    } else {
+      throw new Error(
+        `One or both currencies (${fromCurrency}, ${toCurrency}) not found in rates.`
+      );
+    }
+  } catch (err) {
+    console.error("Error fetching rates:", err);
+    return null; // Return null to indicate failure
+  }
+};
 
   const handleFetchAndConvert = async () => {
     setLoading(true);
@@ -277,12 +291,12 @@ export default function CurrencyConverterCard() {
     setResult(null);
   };
 
-
   return (
     <motion.div
       initial={{ scale: 0.8, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
       transition={{ duration: 0.5 }}
+      className="currency-converter-card"
     >
       <Card className="max-w-md mx-auto backdrop-blur-sm bg-white/80">
         <CardHeader>
@@ -348,6 +362,55 @@ export default function CurrencyConverterCard() {
               onChange={(e) => setAmount(e.target.value)}
               className="text-lg"
             />
+
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="date-picker-toggle"
+                checked={isDatePickerVisible}
+                onCheckedChange={setIsDatePickerVisible}
+              />
+              <label
+                htmlFor="date-picker-toggle"
+                className="text-sm font-medium"
+              >
+                User Historic Rates
+              </label>
+            </div>
+
+            {isDatePickerVisible && (
+              <div className="flex flex-col">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "w-[240px] pl-3 text-left font-normal",
+                        !selectedDate && "text-muted-foreground"
+                      )}
+                    >
+                      {selectedDate ? (
+                        format(selectedDate, "PPP")
+                      ) : (
+                        <span>Pick a Date</span>
+                      )}
+                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={selectedDate}
+                      onSelect={setSelectedDate}
+                      disabled={(date) =>
+                        date > new Date() || date < new Date("1900-01-01")
+                      }
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            )}
+
             <Button
               onClick={handleFetchAndConvert}
               className="w-full text-lg"

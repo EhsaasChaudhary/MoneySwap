@@ -1,14 +1,19 @@
 "use server";
 import type { ExchangeRatesResponse } from "@/types/exchangeRates";
 
+const BASE_URL = "https://data.fixer.io/api";
+const ACCESS_KEY = "a08a92c377bc269b9568919d175b2302";
 
+// const BASE_URL = process.env.API_BASE_URL;
+// const ACCESS_KEY = process.env.API_ACCESS_KEY;
 
-/**`
+/**
+ * Fetches the latest exchange rates for all currencies.
  * @returns A Promise resolving to the latest exchange rates.
  */
 export async function getLatestExchangeRates(): Promise<ExchangeRatesResponse> {
   try {
-    const url = `${process.env.API_BASE_URL}/latest?access_key=${process.env.API_ACCESS_KEY}`;
+    const url = `${BASE_URL}/latest?access_key=${ACCESS_KEY}`;
     const response = await fetch(url, {
       next: { revalidate: 3600 * 24 },
     });
@@ -36,7 +41,7 @@ export async function getHistoricalExchangeRates(
   date: string
 ): Promise<ExchangeRatesResponse> {
   try {
-    const url = `${process.env.API_BASE_URL}/${date}?access_key=${process.env.API_ACCESS_KEY}`;
+    const url = `${BASE_URL}/${date}?access_key=${ACCESS_KEY}`;
     const response = await fetch(url, {
       next: { revalidate: 3600 * 24 },
     });

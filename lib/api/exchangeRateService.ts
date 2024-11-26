@@ -14,6 +14,7 @@ export async function getLatestExchangeRates(): Promise<ExchangeRatesResponse> {
     const url = `${BASE_URL}/latest?access_key=${ACCESS_KEY}`;
     const response = await fetch(url, {
       next: { revalidate: 3600 * 24 },
+      cache: "force-cache",
     });
 
     if (!response.ok) {
@@ -42,6 +43,7 @@ export async function getHistoricalExchangeRates(
     const url = `${BASE_URL}/${date}?access_key=${ACCESS_KEY}`;
     const response = await fetch(url, {
       next: { revalidate: 3600 * 24 },
+      cache: "force-cache",
     });
 
     if (!response.ok) {

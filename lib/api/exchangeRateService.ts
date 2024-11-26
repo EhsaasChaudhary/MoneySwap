@@ -2,18 +2,15 @@
 import type { ExchangeRatesResponse } from "@/types/exchangeRates";
 
 
-const BASE_URL = process.env.API_BASE_URL;
-const ACCESS_KEY = process.env.API_ACCESS_KEY;
 
 /**`
  * @returns A Promise resolving to the latest exchange rates.
  */
 export async function getLatestExchangeRates(): Promise<ExchangeRatesResponse> {
   try {
-    const url = `${BASE_URL}/latest?access_key=${ACCESS_KEY}`;
+    const url = `${process.env.API_BASE_URL}/latest?access_key=${process.env.API_ACCESS_KEY}`;
     const response = await fetch(url, {
       next: { revalidate: 3600 * 24 },
-      cache: "force-cache",
     });
 
     if (!response.ok) {
@@ -39,10 +36,9 @@ export async function getHistoricalExchangeRates(
   date: string
 ): Promise<ExchangeRatesResponse> {
   try {
-    const url = `${BASE_URL}/${date}?access_key=${ACCESS_KEY}`;
+    const url = `${process.env.API_BASE_URL}/${date}?access_key=${process.env.API_ACCESS_KEY}`;
     const response = await fetch(url, {
       next: { revalidate: 3600 * 24 },
-      cache: "force-cache",
     });
 
     if (!response.ok) {

@@ -13,7 +13,7 @@
 
 # Demo and Screenshots :movie_camera:
 
-## View live preview [here](ec-currency-exchange.vercel.app).
+## View live preview [here](https://ec-currency-exchange.vercel.app).
 
 
 ---

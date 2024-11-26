@@ -23,7 +23,7 @@ const Footer = ({ className, ...rest }: { className?: string }) => {
           &copy; 2024 Currency Convert
         </motion.p>
         <motion.a
-          href="https://github.com"
+          href="https://github.com/EhsaasChaudhary/currency-exchange-submission"
           className="text-white bg-clip-text text-transparent bg-gradient-to-r from-green-500 to-violet-500 font-bold hover:text-white/80 flex items-center"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}

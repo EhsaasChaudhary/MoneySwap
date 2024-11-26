@@ -5,8 +5,7 @@ import type { ExchangeRatesResponse } from "@/types/exchangeRates";
 const BASE_URL = process.env.API_BASE_URL;
 const ACCESS_KEY = process.env.API_ACCESS_KEY;
 
-/**
- * Fetches the latest exchange rates for all currencies.
+/**`
  * @returns A Promise resolving to the latest exchange rates.
  */
 export async function getLatestExchangeRates(): Promise<ExchangeRatesResponse> {

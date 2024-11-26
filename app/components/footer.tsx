@@ -1,14 +1,30 @@
-import { motion } from 'framer-motion'
-import { Github } from 'lucide-react'
+"use client";
 
-export default function Footer() {
+import React from "react";
+import { motion } from "framer-motion";
+import { Github } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+const Footer = ({ className, ...rest }: { className?: string }) => {
   return (
-    <footer className="bg-muted footer py-6">
-      <div className="container mx-auto px-4 flex justify-between items-center">
-        <p>&copy; 2024 CurrencyConvert</p>
+    <footer
+      className={cn(
+        "bg-black-500 text-primary-foreground py-6 relative z-10",
+        className
+      )}
+      {...rest}
+    >
+      <div className="container bg-clip-text text-transparent bg-gradient-to-r from-green-500 to-violet-500 font-bold mx-auto px-4 flex justify-between items-center">
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+        >
+          &copy; 2024 CurrencyConvert
+        </motion.p>
         <motion.a
           href="https://github.com"
-          className="text-primary hover:text-primary/80 flex items-center"
+          className="text-white bg-clip-text text-transparent bg-gradient-to-r from-green-500 to-violet-500 font-bold hover:text-white/80 flex items-center"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
@@ -17,5 +33,8 @@ export default function Footer() {
         </motion.a>
       </div>
     </footer>
-  )
-}
+  );
+};
+
+export default React.memo(Footer);
+

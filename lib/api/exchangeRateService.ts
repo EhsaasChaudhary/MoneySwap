@@ -3,6 +3,9 @@ import type { ExchangeRatesResponse } from "@/types/exchangeRates";
 const BASE_URL = "https://data.fixer.io/api";
 const ACCESS_KEY = "a08a92c377bc269b9568919d175b2302";
 
+// const BASE_URL = process.env.API_BASE_URL;
+// const ACCESS_KEY = process.env.API_ACCESS_KEY;
+
 /**
  * Fetches the latest exchange rates for all currencies.
  * @returns A Promise resolving to the latest exchange rates.

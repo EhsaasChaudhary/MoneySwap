@@ -20,7 +20,7 @@ const Footer = ({ className, ...rest }: { className?: string }) => {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
         >
-          &copy; 2024 CurrencyConvert
+          &copy; 2024 Currency Convert
         </motion.p>
         <motion.a
           href="https://github.com"
